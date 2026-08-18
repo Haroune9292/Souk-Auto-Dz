@@ -11,10 +11,13 @@ export default function CarCard({ car }: { car: any }) {
   return (
     <>
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition flex flex-col">
-        {/* النقر على الصورة يفتح نافذة عرض الصور فقط */}
+        {/* النقر على الصورة يفتح النافذة المنبثقة */}
         <div 
           className="relative h-48 w-full cursor-pointer bg-gray-100 overflow-hidden group"
-          onClick={() => { setActiveImgIndex(0); setShowModal(true); }}
+          onClick={() => { 
+            setActiveImgIndex(0); 
+            setShowModal(true); 
+          }}
         >
           <img 
             src={imagesList[0]} 
@@ -46,12 +49,12 @@ export default function CarCard({ car }: { car: any }) {
         </div>
       </div>
 
-      {/* نافذة منبثقة لعرض الصور فقط */}
+      {/* نافذة عرض الصور المنبثقة */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
           <button 
             onClick={() => setShowModal(false)}
-            className="absolute top-6 right-6 text-white text-3xl font-bold bg-white/20 hover:bg-white/40 w-12 h-12 rounded-full flex items-center justify-center transition"
+            className="absolute top-6 right-6 text-white text-3xl font-bold bg-white/20 hover:bg-white/40 w-12 h-12 rounded-full flex items-center justify-center transition cursor-pointer"
           >
             ✕
           </button>
@@ -70,7 +73,7 @@ export default function CarCard({ car }: { car: any }) {
                 <button
                   key={idx}
                   onClick={() => setActiveImgIndex(idx)}
-                  className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition ${activeImgIndex === idx ? 'border-blue-500 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                  className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition cursor-pointer ${activeImgIndex === idx ? 'border-blue-500 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
                 >
                   <img src={img} alt="Thumb" className="w-full h-full object-cover" />
                 </button>
