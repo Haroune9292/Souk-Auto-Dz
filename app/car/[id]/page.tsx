@@ -9,6 +9,7 @@ export default function CarDetails() {
   const params = useParams();
   const id = params?.id;
   const [car, setCar] = useState<any>(null);
+  const [sellerName, setSellerName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState('');
 
@@ -36,6 +37,28 @@ export default function CarDetails() {
       } else if (data?.image) {
         setSelectedImage(data.image);
       }
+
+      // التحقق مما إذا كان البائع مسجلاً أو ضيفاً
+      if (data?.user_id) {
+        // محاولة جلب اسم المستخدم من جدول البروفايل إن وجد، أو اسم افتراضي للمسجل
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name, username')
+          .eq('id', data.user_id)
+          .single();
+
+        if (profileData?.full_name) {
+          setSellerName(profileData.full_name);
+        } else if (profileData?.username) {
+          setSellerName(profileData.username);
+        } else {
+          setSellerName('Registered Seller');
+        }
+      } else {
+        // إذا نشر كضيف (Guest)
+        const guestId = data?.id ? data.id.slice(0, 6).toUpperCase() : '0000';
+        setSellerName(`Guest User (ID: #${guestId})`);
+      }
     }
     setLoading(false);
   }
@@ -60,7 +83,6 @@ export default function CarDetails() {
       })
     : 'N/A';
 
-  // تنسيق رقم الهاتف ورابط الواتساب
   const cleanPhone = car.phone ? car.phone.replace(/[^0-9+]/g, '') : '';
   const whatsappUrl = cleanPhone 
     ? `https://wa.me/${cleanPhone.startsWith('+') ? cleanPhone.replace('+', '') : '213' + cleanPhone.replace(/^0/, '')}?text=${encodeURIComponent(`Hello, I am interested in your car "${car.title}" listed on Souk Auto Dz.`)}` 
@@ -113,12 +135,15 @@ export default function CarDetails() {
           </div>
         </div>
 
-        {/* قسم تواصل البائع (واتساب / رقم الهاتف) */}
+        {/* قسم تواصل البائع ومعلومات الحساب (مسجل أو ضيف) وزر الواتساب */}
         <div className="bg-blue-50 border border-blue-100 p-6 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">Seller Contact</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Seller Information</h3>
+            <p className="text-blue-700 font-bold text-sm mb-1">
+              👤 Seller: {sellerName}
+            </p>
             <p className="text-gray-600 text-sm">
-              {car.phone ? `Phone: ${car.phone}` : 'No phone number provided by the seller for this ad.'}
+              {car.phone ? `Phone: ${car.phone}` : 'No phone number provided by the seller.'}
             </p>
           </div>
 
