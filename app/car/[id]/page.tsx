@@ -60,6 +60,12 @@ export default function CarDetails() {
       })
     : 'N/A';
 
+  // تنسيق رقم الهاتف ورابط الواتساب
+  const cleanPhone = car.phone ? car.phone.replace(/[^0-9+]/g, '') : '';
+  const whatsappUrl = cleanPhone 
+    ? `https://wa.me/${cleanPhone.startsWith('+') ? cleanPhone.replace('+', '') : '213' + cleanPhone.replace(/^0/, '')}?text=${encodeURIComponent(`Hello, I am interested in your car "${car.title}" listed on Souk Auto Dz.`)}` 
+    : null;
+
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4 text-black">
       <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-6 md:p-8">
@@ -94,7 +100,7 @@ export default function CarDetails() {
           )}
         </div>
 
-        {/* تفاصيل السيارة */}
+        {/* تفاصيل السيارة والسعر */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-gray-100 pb-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">{car.title}</h1>
@@ -105,6 +111,31 @@ export default function CarDetails() {
           <div className="text-3xl md:text-4xl font-black text-blue-600">
             {car.price ? `${car.price} DZD` : 'N/A'}
           </div>
+        </div>
+
+        {/* قسم تواصل البائع (واتساب / رقم الهاتف) */}
+        <div className="bg-blue-50 border border-blue-100 p-6 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Seller Contact</h3>
+            <p className="text-gray-600 text-sm">
+              {car.phone ? `Phone: ${car.phone}` : 'No phone number provided by the seller for this ad.'}
+            </p>
+          </div>
+
+          {whatsappUrl ? (
+            <a 
+              href={whatsappUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition shadow-md w-full sm:w-auto justify-center"
+            >
+              <span>💬 Contact on WhatsApp</span>
+            </a>
+          ) : (
+            <span className="bg-gray-200 text-gray-500 px-5 py-3 rounded-xl font-semibold text-sm">
+              WhatsApp Unavailable
+            </span>
+          )}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8">
@@ -126,7 +157,7 @@ export default function CarDetails() {
           </div>
         </div>
 
-        {/* قسم وصف السيارة */}
+        {/* وصف السيارة */}
         <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
           <h2 className="text-xl font-bold text-gray-900 mb-3">Description (وصف السيارة)</h2>
           <p className="text-gray-700 whitespace-pre-line leading-relaxed">
