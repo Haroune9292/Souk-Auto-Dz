@@ -3,7 +3,6 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export default function CreateAd() {
   const router = useRouter();
@@ -33,14 +32,13 @@ export default function CreateAd() {
     checkUser();
   }, []);
 
-  // دالة رفع الصور (تم تحديد النوع string[] لحل خطأ TypeScript)
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     setUploading(true);
     setErrorMessage('');
     
     try {
-      const uploadedUrls: string[] = []; // النوع المحدد هنا يحل المشكلة
+      const uploadedUrls: string[] = [];
       const files = Array.from(e.target.files);
       
       for (const file of files) {
@@ -77,7 +75,7 @@ export default function CreateAd() {
         title, 
         price: Number(price), 
         wilaya, 
-        commune, 
+        commune: commune || 'N/A', 
         year: Number(year), 
         fuel, 
         transmission, 
@@ -99,7 +97,6 @@ export default function CreateAd() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Hero Section */}
       <div 
         className="relative h-80 flex items-center justify-center bg-cover bg-center"
         style={{ backgroundImage: "linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9)), url('/market-bg.jpg')" }}
@@ -112,6 +109,7 @@ export default function CreateAd() {
 
       <div className="max-w-4xl mx-auto -mt-24 px-4 pb-20 relative z-20">
         <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-xl text-slate-900 rounded-3xl shadow-2xl p-8 md:p-12 border border-white/20">
+          
           <h2 className="text-3xl font-black mb-8 flex items-center gap-3">
              <span className="w-1.5 h-8 bg-blue-600 rounded-full"></span> Vehicle Details
           </h2>
@@ -119,7 +117,7 @@ export default function CreateAd() {
           {errorMessage && <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-xl font-bold border border-red-200">{errorMessage}</div>}
           {success && <div className="mb-6 p-4 bg-emerald-100 text-emerald-700 rounded-xl font-bold border border-emerald-200">{success}</div>}
 
-          {/* Section 1 */}
+          {/* Section 1: General Info */}
           <div className="mb-8">
             <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">01. General Info</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -128,16 +126,16 @@ export default function CreateAd() {
             </div>
           </div>
 
-          {/* Section 2 */}
+          {/* Section 2: Location */}
           <div className="mb-8 border-t border-slate-200 pt-8">
             <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">02. Location</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <input required value={wilaya} onChange={(e) => setWilaya(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Wilaya" />
-              <input value={commune} onChange={(e) => setCommune(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Commune (Optional)" />
+              <input value={commune} onChange={(e) => setCommune(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Commune" />
             </div>
           </div>
 
-          {/* Section 3 */}
+          {/* Section 3: Specs */}
           <div className="mb-8 border-t border-slate-200 pt-8">
             <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">03. Specs</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -156,7 +154,7 @@ export default function CreateAd() {
             </div>
           </div>
 
-          {/* Section 4 */}
+          {/* Section 4: Media */}
           <div className="mb-8 border-t border-slate-200 pt-8">
             <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">04. Media & Contact</h3>
             <div className="space-y-4">
