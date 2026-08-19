@@ -15,7 +15,7 @@ export default function CreateAd() {
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
   const [wilaya, setWilaya] = useState('');
-  const [commune, setCommune] = useState('N/A');
+  const [commune, setCommune] = useState(''); // تم مسح القيمة الافتراضية ليظهر النص كـ placeholder
   const [year, setYear] = useState('');
   const [fuel, setFuel] = useState('DIESEL');
   const [transmission, setTransmission] = useState('Automatic');
@@ -75,7 +75,7 @@ export default function CreateAd() {
         title, 
         price: Number(price), 
         wilaya, 
-        commune: commune || 'N/A', 
+        commune: commune || 'N/A', // إذا ترك المستخدم الحقل فارغاً، سيتم حفظ N/A تلقائياً
         year: Number(year), 
         fuel, 
         transmission, 
@@ -117,7 +117,7 @@ export default function CreateAd() {
           {errorMessage && <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-xl font-bold border border-red-200">{errorMessage}</div>}
           {success && <div className="mb-6 p-4 bg-emerald-100 text-emerald-700 rounded-xl font-bold border border-emerald-200">{success}</div>}
 
-          {/* Section 1: General Info */}
+          {/* Section 1 */}
           <div className="mb-8">
             <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">01. General Info</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -126,7 +126,7 @@ export default function CreateAd() {
             </div>
           </div>
 
-          {/* Section 2: Location */}
+          {/* Section 2 */}
           <div className="mb-8 border-t border-slate-200 pt-8">
             <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">02. Location</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -135,7 +135,7 @@ export default function CreateAd() {
             </div>
           </div>
 
-          {/* Section 3: Specs */}
+          {/* Section 3 */}
           <div className="mb-8 border-t border-slate-200 pt-8">
             <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">03. Specs</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -154,7 +154,7 @@ export default function CreateAd() {
             </div>
           </div>
 
-          {/* Section 4: Media */}
+          {/* Section 4 */}
           <div className="mb-8 border-t border-slate-200 pt-8">
             <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">04. Media & Contact</h3>
             <div className="space-y-4">
