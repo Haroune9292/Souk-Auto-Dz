@@ -4,8 +4,9 @@ import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
-// قائمة الـ 69 منطقة/ولاية
+// القائمة الكاملة: 58 ولاية + الـ 11 منطقة الإضافية من صورتك (المجموع 69)
 const wilayas = [
+  // الـ 58 ولاية الرسمية
   "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira", 
   "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saïda", 
   "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", 
@@ -13,7 +14,9 @@ const wilayas = [
   "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", "Aïn Témouchent", 
   "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", "Béni Abbès", "In Salah", 
   "In Guezzam", "Touggourt", "Djanet", "El M'Ghair", "El Meniaa",
-  "Zone 59", "Zone 60", "Zone 61", "Zone 62", "Zone 63", "Zone 64", "Zone 65", "Zone 66", "Zone 67", "Zone 68", "Zone 69"
+  // الـ 11 منطقة الإضافية من الصورة
+  "Aflou", "Aïn Oussera", "Barika", "Bir el-Ater", "Bou Saâda", 
+  "El Abiodh Sidi Cheikh", "El Aricha", "El Kantara", "Ksar Chellala", "Ksar El Boukhari", "Messaad"
 ];
 
 export default function CreateAd() {
@@ -144,7 +147,7 @@ export default function CreateAd() {
             <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">02. Location</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">Wilaya</label>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">Wilaya / Region (69)</label>
                 <select 
                   value={wilaya} 
                   onChange={(e) => setWilaya(e.target.value)} 
