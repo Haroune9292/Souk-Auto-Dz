@@ -204,7 +204,7 @@ export default function CreateAd() {
             </div>
           </div>
 
-          {/* Section 4: Media & Contact */}
+          {/* Section 4: Media, Description & Contact */}
           <div className="mb-8 border-t border-slate-800 pt-8">
             <h3 className="text-xs font-black uppercase text-amber-400 mb-4 tracking-widest">{t('mediaContact')}</h3>
             <div className="space-y-4">
@@ -212,9 +212,22 @@ export default function CreateAd() {
                 <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('phone')}</label>
                 <input required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('phonePlaceholder')} />
               </div>
+
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('descriptionLabel')}</label>
+                <textarea 
+                  rows={4}
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)} 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition resize-none" 
+                  placeholder={t('descriptionPlaceholder')} 
+                />
+              </div>
+
               <label className="block text-xs font-black uppercase text-slate-400 mt-4">{t('uploadPictures')}</label>
               <input type="file" multiple onChange={handleFileUpload} className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-amber-400 file:text-slate-950 file:font-bold file:cursor-pointer hover:file:bg-amber-500 transition" />
               {uploading && <p className="text-amber-400 font-bold">{t('uploading')}</p>}
+              
               <div>
                 <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('pasteImageUrls')}</label>
                 <input value={images} onChange={(e) => setImages(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder="e.g. https://images.unsplash.com/..." />
