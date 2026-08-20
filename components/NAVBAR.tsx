@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-
+import { useLanguage } from '@/lib/context/LanguageContext';
 export default function Navbar() {
+  const { lang, setLang } = useLanguage(); // تم إضافة هذا السطر
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -42,6 +43,18 @@ export default function Navbar() {
 
         {/* Navigation Actions */}
         <div className="flex items-center gap-3">
+          
+          {/* زر اختيار اللغة الجديد */}
+          <select 
+            value={lang} 
+            onChange={(e) => setLang(e.target.value as any)}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold px-3 py-2.5 rounded-2xl cursor-pointer transition border-none outline-none"
+          >
+            <option value="fr">FR</option>
+            <option value="en">EN</option>
+            <option value="ar">AR</option>
+          </select>
+
           <Link 
             href="/" 
             className="text-sm font-bold text-slate-600 hover:text-blue-600 px-3 py-2 transition hidden sm:inline-block"
