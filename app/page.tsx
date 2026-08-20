@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import { useLanguage } from '@/lib/context/LanguageContext';
 
 export default function Home() {
+  const { t } = useLanguage();
   const [cars, setCars] = useState<any[]>([]);
   const [filteredCars, setFilteredCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,13 +109,13 @@ export default function Home() {
         <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]"></div>
         <div className="max-w-7xl mx-auto text-center relative z-10">
           <span className="bg-blue-600/30 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-4 inline-block">
-            Algeria's Premium Auto Marketplace
+            {t('badge') || "Algeria's Premium Auto Marketplace"}
           </span>
           <h1 className="text-4xl md:text-6xl font-black mb-4 tracking-tight">
-            Find Your Dream Car <span className="text-blue-500">Today</span>
+            {t('findCar') || "Find Your Dream Car"} <span className="text-blue-500">Today</span>
           </h1>
           <p className="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto font-medium">
-            Browse verified listings, connect directly with sellers, and buy or sell vehicles securely across all wilayas.
+            {t('subtitle') || "Browse verified listings, connect directly with sellers, and buy or sell vehicles securely across all wilayas."}
           </p>
         </div>
       </div>
@@ -125,35 +127,35 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Search Keywords</label>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">{t('searchKeywords') || "Search Keywords"}</label>
               <input 
                 type="text" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Model, brand..."
+                placeholder={t('searchPlaceholder') || "Model, brand..."}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none transition bg-slate-50/50"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Wilaya</label>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">{t('wilaya') || "Wilaya"}</label>
               <input 
                 type="text" 
                 value={selectedWilaya}
                 onChange={(e) => setSelectedWilaya(e.target.value)}
-                placeholder="e.g. Alger, Oran"
+                placeholder={t('wilayaPlaceholder') || "e.g. Alger, Oran"}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none transition bg-slate-50/50"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Fuel Type</label>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">{t('fuelType') || "Fuel Type"}</label>
               <select 
                 value={selectedFuel}
                 onChange={(e) => setSelectedFuel(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none transition bg-slate-50/50"
               >
-                <option value="">All Fuel Types</option>
+                <option value="">{t('allFuel') || "All Fuel Types"}</option>
                 <option value="DIESEL">Diesel</option>
                 <option value="ESSENCE">Essence</option>
                 <option value="ESSENCE-GAS">Essence-Gas</option>
@@ -163,39 +165,39 @@ export default function Home() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Transmission</label>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">{t('transmission') || "Transmission"}</label>
               <select 
                 value={selectedTransmission}
                 onChange={(e) => setSelectedTransmission(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none transition bg-slate-50/50"
               >
-                <option value="">All Transmissions</option>
+                <option value="">{t('allTrans') || "All Transmissions"}</option>
                 <option value="Automatic">Automatic</option>
                 <option value="Manual">Manual</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Max Mileage (Km)</label>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">{t('maxMileage') || "Max Mileage (Km)"}</label>
               <input 
                 type="number" 
                 value={maxMileage}
                 onChange={(e) => setMaxMileage(e.target.value)}
-                placeholder="e.g. 150000"
+                placeholder={t('maxMileagePlaceholder') || "e.g. 150000"}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none transition bg-slate-50/50"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">Sort By</label>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2">{t('sortBy') || "Sort By"}</label>
               <select 
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none transition bg-slate-50/50"
               >
-                <option value="newest">Newest Listings</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
+                <option value="newest">{t('newest') || "Newest Listings"}</option>
+                <option value="price-asc">{t('priceLowHigh') || "Price: Low to High"}</option>
+                <option value="price-desc">{t('priceHighLow') || "Price: High to Low"}</option>
               </select>
             </div>
 
@@ -205,16 +207,16 @@ export default function Home() {
         {/* Section Header */}
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">
-            Featured Listings <span className="text-slate-400 font-normal text-lg">({filteredCars.length})</span>
+            {t('featured') || "Featured Listings"} <span className="text-slate-400 font-normal text-lg">({filteredCars.length})</span>
           </h2>
         </div>
 
         {/* Listings Grid */}
         {loading ? (
-          <div className="text-center py-24 font-semibold text-slate-500 animate-pulse">Loading amazing cars...</div>
+          <div className="text-center py-24 font-semibold text-slate-500 animate-pulse">{t('loadingCars') || "Loading amazing cars..."}</div>
         ) : filteredCars.length === 0 ? (
           <div className="text-center py-24 bg-white rounded-3xl shadow-sm border border-slate-200 text-slate-500 font-medium">
-            No cars found matching your criteria. Try resetting your filters.
+            {t('noCars') || "No cars found matching your criteria. Try resetting your filters."}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -238,7 +240,7 @@ export default function Home() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                       <span className="text-white text-xs font-bold bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                        🔍 Click to preview pictures
+                        🔍 {t('clickPreview') || "Click to preview pictures"}
                       </span>
                     </div>
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-slate-800 shadow-sm">
@@ -267,7 +269,7 @@ export default function Home() {
                         href={`/car/${car.id}`}
                         className="block w-full text-center bg-slate-900 hover:bg-blue-600 text-white py-3 rounded-2xl font-bold transition shadow-md shadow-slate-200"
                       >
-                        View Details
+                        {t('viewDetails') || "View Details"}
                       </Link>
                     </div>
                   </div>
