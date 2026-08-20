@@ -195,7 +195,7 @@ export default function CreateAd() {
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black py-4 rounded-xl transition shadow-lg shadow-amber-500/20 text-lg cursor-pointer">
+          <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 font-black py-5 rounded-2xl transition shadow-xl shadow-amber-500/30 text-xl tracking-wider cursor-pointer">
             {loading ? t('processing') : t('publishButton')}
           </button>
         </form>

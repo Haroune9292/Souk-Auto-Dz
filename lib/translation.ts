@@ -43,7 +43,7 @@ export const translations: Record<string, Record<string, string>> = {
     uploadPictures: "Upload Pictures",
     uploading: "Uploading...",
     pasteImageUrls: "Or paste image URLs here",
-    publishButton: "🚀 Publish to Marketplace",
+    publishButton: "🔑 Publish to Marketplace",
     processing: "Processing...",
   },
   fr: {
@@ -89,7 +89,7 @@ export const translations: Record<string, Record<string, string>> = {
     uploadPictures: "Télécharger des images",
     uploading: "Téléchargement...",
     pasteImageUrls: "Ou coller les liens des images ici",
-    publishButton: "🚀 Publier sur le marché",
+    publishButton: "🔑 Publier sur le marché",
     processing: "Traitement en cours...",
   },
   ar: {
@@ -135,7 +135,7 @@ export const translations: Record<string, Record<string, string>> = {
     uploadPictures: "رفع الصور",
     uploading: "جاري الرفع...",
     pasteImageUrls: "أو الصق روابط الصور هنا",
-    publishButton: "🚀 نشر في السوق",
+    publishButton: "🔑 نشر في السوق",
     processing: "جاري المعالجة...",
   }
 };
