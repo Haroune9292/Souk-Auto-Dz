@@ -81,21 +81,41 @@ export default function Home() {
     setLoading(false);
   }
 
+  // دالة ذكية وآمنة لاستخراج وتنزيل الصور وتجنب مشكلة الأقواس
+  const parseCarImages = (car: any) => {
+    let imagesList: string[] = ['/peugeot.jpg'];
+    const rawImages = car?.images || car?.image;
+    
+    if (rawImages) {
+      if (Array.isArray(rawImages)) {
+        imagesList = rawImages;
+      } else if (typeof rawImages === 'string') {
+        let cleaned = rawImages.trim();
+        if (cleaned.startsWith('[') && cleaned.endsWith(']')) {
+          try {
+            const parsed = JSON.parse(cleaned);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              imagesList = parsed;
+            }
+          } catch (e) {}
+        }
+        if (imagesList.length === 1 && imagesList[0] === '/peugeot.jpg') {
+          imagesList = cleaned
+            .replace(/[\[\]"']/g, '')
+            .split(',')
+            .map((img: string) => img.trim())
+            .filter(Boolean);
+        }
+      }
+    }
+    return imagesList.length > 0 ? imagesList : ['/peugeot.jpg'];
+  };
+
   const openImageModal = (car: any, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    let imagesList: string[] = ['/peugeot.jpg'];
-    if (car?.images) {
-      if (Array.isArray(car.images)) {
-        imagesList = car.images;
-      } else if (typeof car.images === 'string') {
-        imagesList = car.images.split(',').map((img: string) => img.trim()).filter(Boolean);
-      }
-    } else if (car?.image) {
-      imagesList = [car.image];
-    }
-
+    const imagesList = parseCarImages(car);
     setActiveImages(imagesList);
     setActiveImgIndex(0);
     setShowModal(true);
@@ -221,9 +241,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCars.map((car) => {
-              const carImages = car.images 
-                ? (Array.isArray(car.images) ? car.images : car.images.split(',').map((i: string) => i.trim()).filter(Boolean))
-                : [car.image || '/peugeot.jpg'];
+              const carImages = parseCarImages(car);
 
               return (
                 <div key={car.id} className="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col group">
@@ -237,6 +255,9 @@ export default function Home() {
                       src={carImages[0]} 
                       alt={car.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/peugeot.jpg';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                       <span className="text-white text-xs font-bold bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center gap-1.5">
