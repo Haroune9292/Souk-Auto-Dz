@@ -222,8 +222,8 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCars.map((car) => {
               const carImages = car.images 
-                ? (Array.isArray(car.images) ? car.images : car.images.split(',').map((i: string) => i.trim()).filter(Boolean))
-                : [car.image || '/peugeot.jpg'];
+  ? (Array.isArray(car.images) ? car.images : car.images.split(',').map((i: string) => i.trim()).filter(Boolean))
+  : [car.image || '/peugeot.jpg'];
 
               return (
                 <div key={car.id} className="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col group">
