@@ -31,6 +31,7 @@ export default function CreateAd() {
   const [wilaya, setWilaya] = useState(wilayas[0]);
   const [commune, setCommune] = useState('');
   const [year, setYear] = useState('');
+  const [mileage, setMileage] = useState(''); // تم إضافة حالة الكيلومترات
   const [fuel, setFuel] = useState('DIESEL');
   const [transmission, setTransmission] = useState('Automatic');
   const [phone, setPhone] = useState('');
@@ -91,6 +92,7 @@ export default function CreateAd() {
         wilaya, 
         commune: commune || 'N/A', 
         year: Number(year), 
+        mileage: Number(mileage) || 0, // إرسال الكيلومترات لقاعدة البيانات
         fuel, 
         transmission, 
         phone, 
@@ -164,11 +166,12 @@ export default function CreateAd() {
             </div>
           </div>
 
-          {/* Section 3: Specs */}
+          {/* Section 3: Specs (Year, Mileage, Fuel, Transmission) */}
           <div className="mb-8 border-t border-slate-800 pt-8">
             <h3 className="text-xs font-black uppercase text-amber-400 mb-4 tracking-widest">{t('specs')}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <input type="number" required value={year} onChange={(e) => setYear(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('year')} />
+              <input type="number" required value={mileage} onChange={(e) => setMileage(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('mileagePlaceholder')} />
               <select value={fuel} onChange={(e) => setFuel(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition">
                 <option value="DIESEL" className="bg-slate-900 text-white">Diesel</option>
                 <option value="ESSENCE" className="bg-slate-900 text-white">Essence</option>
