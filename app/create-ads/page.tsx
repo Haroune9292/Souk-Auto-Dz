@@ -3,10 +3,9 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/lib/context/LanguageContext';
 
-// القائمة الكاملة: 58 ولاية + الـ 11 منطقة الإضافية من صورتك (المجموع 69)
 const wilayas = [
-  // الـ 58 ولاية الرسمية
   "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira", 
   "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saïda", 
   "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", 
@@ -14,13 +13,13 @@ const wilayas = [
   "Tissemsilt", "El Oued", "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", "Aïn Témouchent", 
   "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", "Béni Abbès", "In Salah", 
   "In Guezzam", "Touggourt", "Djanet", "El M'Ghair", "El Meniaa",
-  // الـ 11 منطقة الإضافية من الصورة
   "Aflou", "Aïn Oussera", "Barika", "Bir el-Ater", "Bou Saâda", 
   "El Abiodh Sidi Cheikh", "El Aricha", "El Kantara", "Ksar Chellala", "Ksar El Boukhari", "Messaad"
 ];
 
 export default function CreateAd() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -118,8 +117,8 @@ export default function CreateAd() {
         style={{ backgroundImage: "linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9)), url('/market-bg.jpg')" }}
       >
         <div className="text-center z-10 px-4">
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-white">Market Entrance</h1>
-          <p className="text-blue-400 mt-3 font-medium text-lg">Register your premium vehicle in our marketplace</p>
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-white">{t('marketEntrance')}</h1>
+          <p className="text-blue-400 mt-3 font-medium text-lg">{t('registerVehicle')}</p>
         </div>
       </div>
 
@@ -127,7 +126,7 @@ export default function CreateAd() {
         <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-xl text-slate-900 rounded-3xl shadow-2xl p-8 md:p-12 border border-white/20">
           
           <h2 className="text-3xl font-black mb-8 flex items-center gap-3">
-             <span className="w-1.5 h-8 bg-blue-600 rounded-full"></span> Vehicle Details
+              <span className="w-1.5 h-8 bg-blue-600 rounded-full"></span> {t('vehicleDetails')}
           </h2>
 
           {errorMessage && <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-xl font-bold border border-red-200">{errorMessage}</div>}
@@ -135,19 +134,19 @@ export default function CreateAd() {
 
           {/* Section 1: General Info */}
           <div className="mb-8">
-            <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">01. General Info</h3>
+            <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">{t('generalInfo')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input required value={title} onChange={(e) => setTitle(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Car Model (e.g. Peugeot 305)" />
-              <input type="number" required value={price} onChange={(e) => setPrice(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Price (DZD)" />
+              <input required value={title} onChange={(e) => setTitle(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder={t('carModelPlaceholder')} />
+              <input type="number" required value={price} onChange={(e) => setPrice(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder={t('priceDzd')} />
             </div>
           </div>
 
           {/* Section 2: Location */}
           <div className="mb-8 border-t border-slate-200 pt-8">
-            <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">02. Location</h3>
+            <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">{t('location')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">Wilaya / Region (69)</label>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('wilayaRegion')}</label>
                 <select 
                   value={wilaya} 
                   onChange={(e) => setWilaya(e.target.value)} 
@@ -159,17 +158,17 @@ export default function CreateAd() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">Commune</label>
-                <input value={commune} onChange={(e) => setCommune(e.target.value)} className="w-full bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Commune" />
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('commune')}</label>
+                <input value={commune} onChange={(e) => setCommune(e.target.value)} className="w-full bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder={t('commune')} />
               </div>
             </div>
           </div>
 
           {/* Section 3: Specs */}
           <div className="mb-8 border-t border-slate-200 pt-8">
-            <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">03. Specs</h3>
+            <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">{t('specs')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <input type="number" required value={year} onChange={(e) => setYear(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Year" />
+              <input type="number" required value={year} onChange={(e) => setYear(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder={t('year')} />
               <select value={fuel} onChange={(e) => setFuel(e.target.value)} className="bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none">
                 <option value="DIESEL">Diesel</option>
                 <option value="ESSENCE">Essence</option>
@@ -186,18 +185,18 @@ export default function CreateAd() {
 
           {/* Section 4: Media & Contact */}
           <div className="mb-8 border-t border-slate-200 pt-8">
-            <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">04. Media & Contact</h3>
+            <h3 className="text-xs font-black uppercase text-blue-600 mb-4 tracking-widest">{t('mediaContact')}</h3>
             <div className="space-y-4">
-              <input required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Phone Number" />
-              <label className="block text-xs font-black uppercase text-slate-400 mt-4">Upload Pictures</label>
+              <input required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder={t('phone')} />
+              <label className="block text-xs font-black uppercase text-slate-400 mt-4">{t('uploadPictures')}</label>
               <input type="file" multiple onChange={handleFileUpload} className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-600 file:text-white" />
-              {uploading && <p className="text-blue-600 font-bold">Uploading...</p>}
-              <input value={images} onChange={(e) => setImages(e.target.value)} className="w-full bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Or paste image URLs here" />
+              {uploading && <p className="text-blue-600 font-bold">{t('uploading')}</p>}
+              <input value={images} onChange={(e) => setImages(e.target.value)} className="w-full bg-slate-100 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-500 outline-none" placeholder={t('pasteImageUrls')} />
             </div>
           </div>
 
           <button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-blue-600 text-white font-black py-4 rounded-xl transition shadow-lg text-lg">
-            {loading ? 'Processing...' : '🚀 Publish to Marketplace'}
+            {loading ? t('processing') : t('publishButton')}
           </button>
         </form>
       </div>
