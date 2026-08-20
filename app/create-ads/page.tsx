@@ -61,13 +61,13 @@ export default function CreateAd() {
         const fileName = `${Math.random()}.${fileExt}`;
         
         const { error: uploadError } = await supabase.storage
-          .from('cars')
+          .from('car-images')
           .upload(fileName, file);
 
         if (uploadError) throw uploadError;
 
         const { data: publicUrlData } = supabase.storage
-          .from('cars')
+          .from('car-images')
           .getPublicUrl(fileName);
 
         uploadedUrls.push(publicUrlData.publicUrl);
