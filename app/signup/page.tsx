@@ -1,150 +1,150 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
-export default function SignUp() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+export default function Home() {
+  const [cars, setCars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // حالة نافذة عرض الصور المنبثقة
+  const [showModal, setShowModal] = useState(false);
+  const [activeImages, setActiveImages] = useState<string[]>([]);
+  const [activeImgIndex, setActiveImgIndex] = useState(0);
 
-  async function handleSignUp(e: React.FormEvent) {
-    e.preventDefault();
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
+  async function fetchCars() {
     setLoading(true);
-    setErrorMsg('');
-    setSuccessMsg('');
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          phone: phone,
-        },
-      },
-    });
+    const { data, error } = await supabase
+      .from('cars')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (error) {
-      setErrorMsg(error.message);
+      console.error('Error fetching cars:', error);
     } else {
-      setSuccessMsg('تم إنشاء الحساب بنجاح! تم إرسال رابط التفعيل إلى بريدك الإلكتروني (Gmail)، يرجى التحقق منه لتأكيد حسابك.');
-      setFirstName('');
-      setLastName('');
-      setPhone('');
-      setEmail('');
-      setPassword('');
+      setCars(data || []);
     }
     setLoading(false);
   }
 
+  const openImageModal = (car: any, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    let imagesList: string[] = ['/peugeot.jpg'];
+    if (car?.images) {
+      if (Array.isArray(car.images)) {
+        imagesList = car.images;
+      } else if (typeof car.images === 'string') {
+        imagesList = car.images.split(',').map((img: string) => img.trim()).filter(Boolean);
+      }
+    } else if (car?.image) {
+      imagesList = [car.image];
+    }
+
+    setActiveImages(imagesList);
+    setActiveImgIndex(0);
+    setShowModal(true);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 text-black">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-        
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-gray-500 text-sm">Join Souk Auto Dz to buy and sell cars easily</p>
-        </div>
+    <main className="min-h-screen bg-gray-100 py-10 px-4 text-black">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-black mb-8 text-gray-900">Available Car Listings</h1>
 
-        {errorMsg && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl text-sm font-medium text-center">
-            {errorMsg}
+        {loading ? (
+          <div className="text-center py-20 font-semibold text-gray-600">Loading cars...</div>
+        ) : cars.length === 0 ? (
+          <div className="text-center py-20 text-gray-500 font-medium">No cars found.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {cars.map((car) => {
+              const carImages = car.images 
+                ? (Array.isArray(car.images) ? car.images : car.images.split(',').map((i: string) => i.trim()).filter(Boolean))
+                : [car.image || '/peugeot.jpg'];
+
+              return (
+                <div key={car.id} className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition flex flex-col">
+                  
+                  {/* صورة السيارة القابلة للنقر لتفتح المعرض المنبثق */}
+                  <div 
+                    className="relative h-48 w-full cursor-pointer bg-gray-100 overflow-hidden group"
+                    onClick={(e) => openImageModal(car, e)}
+                  >
+                    <img 
+                      src={carImages[0]} 
+                      alt={car.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-bold text-sm">
+                      🔍 Click to view pictures
+                    </div>
+                  </div>
+
+                  {/* تفاصيل السيارة */}
+                  <div className="p-4 flex flex-col flex-grow">
+                    <h3 className="font-bold text-lg text-gray-900 mb-1 truncate">{car.title}</h3>
+                    <p className="text-blue-600 font-extrabold text-xl mb-3">{car.price ? `${car.price} DZD` : 'N/A'}</p>
+                    
+                    <div className="text-gray-500 text-sm mb-4 space-y-1">
+                      <p>📍 {car.wilaya || 'N/A'} {car.commune ? `- ${car.commune}` : ''}</p>
+                      <p>📅 Year: {car.year || 'N/A'} • ⚙️ {car.transmission || 'N/A'}</p>
+                    </div>
+
+                    <div className="mt-auto">
+                      <Link 
+                        href={`/car/${car.id}`}
+                        className="block w-full text-center bg-gray-900 hover:bg-blue-600 text-white py-2.5 rounded-xl font-semibold transition"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
-
-        {successMsg && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl text-sm font-medium text-center">
-            {successMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleSignUp} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-1">First Name</label>
-              <input 
-                type="text" 
-                required
-                placeholder="John" 
-                className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-1">Last Name</label>
-              <input 
-                type="text" 
-                required
-                placeholder="Doe" 
-                className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-1">Phone Number</label>
-            <input 
-              type="tel" 
-              required
-              placeholder="0550000000" 
-              className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-1">Email Address</label>
-            <input 
-              type="email" 
-              required
-              placeholder="name@example.com" 
-              className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-1">Password</label>
-            <input 
-              type="password" 
-              required
-              placeholder="••••••••" 
-              className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:ring-2 focus:ring-blue-400 bg-white"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-blue-600 text-white text-center py-3.5 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-md disabled:opacity-50 mt-2"
-          >
-            {loading ? 'Creating account...' : 'Sign Up'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <Link href="/login" className="text-sm font-semibold text-gray-600 hover:text-blue-600 transition">
-            Already have an account? Sign In
-          </Link>
-        </div>
-
       </div>
-    </div>
+
+      {/* نافذة عرض الصور المنبثقة (Lightbox Modal) */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
+          <button 
+            onClick={() => setShowModal(false)}
+            className="absolute top-6 right-6 text-white text-3xl font-bold bg-white/25 hover:bg-white/40 w-12 h-12 rounded-full flex items-center justify-center transition cursor-pointer"
+          >
+            ✕
+          </button>
+
+          <div className="max-w-4xl max-h-[75vh] w-full flex items-center justify-center mb-4">
+            <img 
+              src={activeImages[activeImgIndex] || activeImages[0]} 
+              alt="Car Preview" 
+              className="max-h-[75vh] max-w-full object-contain rounded-xl shadow-2xl"
+            />
+          </div>
+
+          {activeImages.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto max-w-full p-2">
+              {activeImages.map((img: string, idx: number) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveImgIndex(idx)}
+                  className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition cursor-pointer ${activeImgIndex === idx ? 'border-blue-500 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                >
+                  <img src={img} alt="Thumb" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </main>
   );
 }
