@@ -31,7 +31,7 @@ export default function CreateAd() {
   const [wilaya, setWilaya] = useState(wilayas[0]);
   const [commune, setCommune] = useState('');
   const [year, setYear] = useState('');
-  const [mileage, setMileage] = useState(''); // تم إضافة حالة الكيلومترات
+  const [mileage, setMileage] = useState('');
   const [fuel, setFuel] = useState('DIESEL');
   const [transmission, setTransmission] = useState('Automatic');
   const [phone, setPhone] = useState('');
@@ -92,7 +92,7 @@ export default function CreateAd() {
         wilaya, 
         commune: commune || 'N/A', 
         year: Number(year), 
-        mileage: Number(mileage) || 0, // إرسال الكيلومترات لقاعدة البيانات
+        mileage: Number(mileage) || 0,
         fuel, 
         transmission, 
         phone, 
@@ -138,8 +138,14 @@ export default function CreateAd() {
           <div className="mb-8">
             <h3 className="text-xs font-black uppercase text-amber-400 mb-4 tracking-widest">{t('generalInfo')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input required value={title} onChange={(e) => setTitle(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('carModelPlaceholder')} />
-              <input type="number" required value={price} onChange={(e) => setPrice(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('priceDzd')} />
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('carModelPlaceholder')}</label>
+                <input required value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('carModelPlaceholder')} />
+              </div>
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('priceDzd')}</label>
+                <input type="number" required value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('priceDzd')} />
+              </div>
             </div>
           </div>
 
@@ -166,23 +172,35 @@ export default function CreateAd() {
             </div>
           </div>
 
-          {/* Section 3: Specs (Year, Mileage, Fuel, Transmission) */}
+          {/* Section 3: Specs */}
           <div className="mb-8 border-t border-slate-800 pt-8">
             <h3 className="text-xs font-black uppercase text-amber-400 mb-4 tracking-widest">{t('specs')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <input type="number" required value={year} onChange={(e) => setYear(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('year')} />
-              <input type="number" required value={mileage} onChange={(e) => setMileage(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('mileagePlaceholder')} />
-              <select value={fuel} onChange={(e) => setFuel(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition">
-                <option value="DIESEL" className="bg-slate-900 text-white">Diesel</option>
-                <option value="ESSENCE" className="bg-slate-900 text-white">Essence</option>
-                <option value="ESSENCE-GAS" className="bg-slate-900 text-white">Essence-Gas</option>
-                <option value="HYBRID" className="bg-slate-900 text-white">Hybrid</option>
-                <option value="ELECTRIC" className="bg-slate-900 text-white">Electric</option>
-              </select>
-              <select value={transmission} onChange={(e) => setTransmission(e.target.value)} className="bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition">
-                <option value="Automatic" className="bg-slate-900 text-white">Automatic</option>
-                <option value="Manual" className="bg-slate-900 text-white">Manual</option>
-              </select>
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('year')}</label>
+                <input type="number" required value={year} onChange={(e) => setYear(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('year')} />
+              </div>
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('mileage')}</label>
+                <input type="number" required value={mileage} onChange={(e) => setMileage(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('mileagePlaceholder')} />
+              </div>
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('fuelType') || "Fuel"}</label>
+                <select value={fuel} onChange={(e) => setFuel(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition">
+                  <option value="DIESEL" className="bg-slate-900 text-white">Diesel</option>
+                  <option value="ESSENCE" className="bg-slate-900 text-white">Essence</option>
+                  <option value="ESSENCE-GAS" className="bg-slate-900 text-white">Essence-Gas</option>
+                  <option value="HYBRID" className="bg-slate-900 text-white">Hybrid</option>
+                  <option value="ELECTRIC" className="bg-slate-900 text-white">Electric</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('transmission') || "Transmission"}</label>
+                <select value={transmission} onChange={(e) => setTransmission(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition">
+                  <option value="Automatic" className="bg-slate-900 text-white">Automatic</option>
+                  <option value="Manual" className="bg-slate-900 text-white">Manual</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -190,7 +208,10 @@ export default function CreateAd() {
           <div className="mb-8 border-t border-slate-800 pt-8">
             <h3 className="text-xs font-black uppercase text-amber-400 mb-4 tracking-widest">{t('mediaContact')}</h3>
             <div className="space-y-4">
-              <input required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('phone')} />
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('phone') || "Phone Number"}</label>
+                <input required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('phone')} />
+              </div>
               <label className="block text-xs font-black uppercase text-slate-400 mt-4">{t('uploadPictures')}</label>
               <input type="file" multiple onChange={handleFileUpload} className="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-amber-400 file:text-slate-950 file:font-bold file:cursor-pointer hover:file:bg-amber-500 transition" />
               {uploading && <p className="text-amber-400 font-bold">{t('uploading')}</p>}
