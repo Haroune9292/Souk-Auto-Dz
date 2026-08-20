@@ -1,26 +1,22 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import Navbar from "@/components/NAVBAR";
-import Footer from "@/components/FOOTER";
+import './globals.css';
+import { LanguageProvider } from '@/lib/context/LanguageContext';
 
-export const metadata: Metadata = {
-  title: "OuedKniss Car Classifieds",
-  description: "Car classifieds platform built with Next.js and Supabase",
+export const metadata = {
+  title: 'Souk Auto Dz',
+  description: 'Algeria Car Classifieds Marketplace',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col bg-gray-100 text-black antialiased">
-        <Navbar />
-        <main className="flex-grow">
+    <html lang="fr" dir="ltr">
+      <body>
+        <LanguageProvider>
           {children}
-        </main>
-        <Footer />
+        </LanguageProvider>
       </body>
     </html>
   );
