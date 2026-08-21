@@ -13,11 +13,54 @@ export default function CarDetails() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState('');
 
+  // 💬 States الجديدة الخاصة بالتعليقات (تمت الإضافة دون المساس بكودك)
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [user, setUser] = useState<any>(null);
+
   useEffect(() => {
     if (id) {
       fetchCarDetails();
+      fetchComments(); // جلب التعليقات
+      checkUser();     // التحقق من المستخدم الحالي للتعليق
     }
   }, [id]);
+
+  async function checkUser() {
+    const { data: { session } } = await supabase.auth.getSession();
+    setUser(session?.user || null);
+  }
+
+  async function fetchComments() {
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('car_id', id)
+      .order('created_at', { ascending: false });
+    
+    if (!error) setComments(data || []);
+  }
+
+  async function handleAddComment(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newComment.trim() || !user) return;
+
+    const { error } = await supabase.from('comments').insert([
+      {
+        car_id: id,
+        user_id: user.id,
+        user_email: user.email,
+        content: newComment.trim()
+      }
+    ]);
+
+    if (error) {
+      alert('Error posting comment: ' + error.message);
+    } else {
+      setNewComment('');
+      fetchComments(); // تحديث قائمة التعليقات فوراً
+    }
+  }
 
   async function fetchCarDetails() {
     setLoading(true);
@@ -40,7 +83,6 @@ export default function CarDetails() {
 
       // التحقق مما إذا كان البائع مسجلاً أو ضيفاً
       if (data?.user_id) {
-        // محاولة جلب اسم المستخدم من جدول البروفايل إن وجد، أو اسم افتراضي للمسجل
         const { data: profileData } = await supabase
           .from('profiles')
           .select('full_name, username')
@@ -55,7 +97,6 @@ export default function CarDetails() {
           setSellerName('Registered Seller');
         }
       } else {
-        // إذا نشر كضيف (Guest)
         const guestId = data?.id ? data.id.slice(0, 6).toUpperCase() : '0000';
         setSellerName(`Guest User (ID: #${guestId})`);
       }
@@ -90,7 +131,7 @@ export default function CarDetails() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4 text-black">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-6 md:p-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-6 md:p-8 space-y-8">
         
         <div className="flex justify-between items-center mb-6">
           <Link href="/" className="text-blue-600 font-semibold hover:underline">
@@ -188,6 +229,54 @@ export default function CarDetails() {
           <p className="text-gray-700 whitespace-pre-line leading-relaxed">
             {car.description || 'No description provided.'}
           </p>
+        </div>
+
+        {/* 💬 قسم التعليقات المضاف حديثاً (متناسق تماماً مع تصميمك الفاتح) */}
+        <div className="bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-100 mt-8">
+          <h3 className="text-2xl font-black mb-6 text-gray-900 flex items-center gap-2">
+            💬 Comments ({comments.length})
+          </h3>
+
+          {/* نموذج الكتابة يظهر فقط للمستخدمين المسجلين */}
+          {user ? (
+            <form onSubmit={handleAddComment} className="mb-8 space-y-4">
+              <textarea 
+                rows={3}
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Ask a question or leave a comment about this car..."
+                className="w-full bg-white border border-gray-200 rounded-xl p-4 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-600 outline-none resize-none shadow-sm"
+                required
+              />
+              <button 
+                type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-md cursor-pointer"
+              >
+                Post Comment
+              </button>
+            </form>
+          ) : (
+            <div className="mb-8 p-4 bg-white border border-gray-200 rounded-xl text-center text-gray-600 shadow-sm">
+              Please <Link href="/login" className="text-blue-600 font-bold underline">Sign In</Link> to leave a comment on this vehicle.
+            </div>
+          )}
+
+          {/* قائمة التعليقات */}
+          <div className="space-y-4">
+            {comments.length === 0 ? (
+              <p className="text-gray-500 italic">No comments yet. Be the first to comment!</p>
+            ) : (
+              comments.map((comm) => (
+                <div key={comm.id} className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-bold text-blue-600">{comm.user_email || 'User'}</span>
+                    <span className="text-xs text-gray-400">{new Date(comm.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <p className="text-gray-700 text-sm whitespace-pre-line">{comm.content}</p>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
       </div>
