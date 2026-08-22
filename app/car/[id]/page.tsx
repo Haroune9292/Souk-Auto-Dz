@@ -13,7 +13,7 @@ export default function CarDetails() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState('');
 
-  // 💬 States الجديدة الخاصة بالتعليقات (تمت الإضافة دون المساس بكودك)
+  // 💬 States الجديدة الخاصة بالتعليقات
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [user, setUser] = useState<any>(null);
@@ -21,8 +21,8 @@ export default function CarDetails() {
   useEffect(() => {
     if (id) {
       fetchCarDetails();
-      fetchComments(); // جلب التعليقات
-      checkUser();     // التحقق من المستخدم الحالي للتعليق
+      fetchComments();
+      checkUser();
     }
   }, [id]);
 
@@ -45,11 +45,27 @@ export default function CarDetails() {
     e.preventDefault();
     if (!newComment.trim() || !user) return;
 
+    // جلب اسم المستخدم (Username) من جدول profiles أو استخدام اسم افتراضي بدلاً من الإيميل
+    let displayName = 'Member';
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username, full_name')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.username) {
+      displayName = profile.username;
+    } else if (profile?.full_name) {
+      displayName = profile.full_name;
+    } else if (user.email) {
+      displayName = user.email.split('@')[0];
+    }
+
     const { error } = await supabase.from('comments').insert([
       {
         car_id: id,
         user_id: user.id,
-        user_email: user.email,
+        username: displayName, // تخزين اسم المستخدم بدلاً من البريد الإلكتروني
         content: newComment.trim()
       }
     ]);
@@ -58,7 +74,7 @@ export default function CarDetails() {
       alert('Error posting comment: ' + error.message);
     } else {
       setNewComment('');
-      fetchComments(); // تحديث قائمة التعليقات فوراً
+      fetchComments();
     }
   }
 
@@ -131,7 +147,7 @@ export default function CarDetails() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4 text-black">
-      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-6 md:p-8 space-y-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden p-6 md:p-8">
         
         <div className="flex justify-between items-center mb-6">
           <Link href="/" className="text-blue-600 font-semibold hover:underline">
@@ -224,20 +240,19 @@ export default function CarDetails() {
         </div>
 
         {/* وصف السيارة */}
-        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+        <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 mb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-3">Description (وصف السيارة)</h2>
           <p className="text-gray-700 whitespace-pre-line leading-relaxed">
             {car.description || 'No description provided.'}
           </p>
         </div>
 
-        {/* 💬 قسم التعليقات المضاف حديثاً (متناسق تماماً مع تصميمك الفاتح) */}
-        <div className="bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-100 mt-8">
+        {/* 💬 قسم التعليقات المضاف حديثاً (باستخدام username لحماية الخصوصية) */}
+        <div className="bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-100">
           <h3 className="text-2xl font-black mb-6 text-gray-900 flex items-center gap-2">
             💬 Comments ({comments.length})
           </h3>
 
-          {/* نموذج الكتابة يظهر فقط للمستخدمين المسجلين */}
           {user ? (
             <form onSubmit={handleAddComment} className="mb-8 space-y-4">
               <textarea 
@@ -261,7 +276,6 @@ export default function CarDetails() {
             </div>
           )}
 
-          {/* قائمة التعليقات */}
           <div className="space-y-4">
             {comments.length === 0 ? (
               <p className="text-gray-500 italic">No comments yet. Be the first to comment!</p>
@@ -269,7 +283,7 @@ export default function CarDetails() {
               comments.map((comm) => (
                 <div key={comm.id} className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-bold text-blue-600">{comm.user_email || 'User'}</span>
+                    <span className="text-xs font-bold text-blue-600">👤 {comm.username || 'Anonymous User'}</span>
                     <span className="text-xs text-gray-400">{new Date(comm.created_at).toLocaleDateString()}</span>
                   </div>
                   <p className="text-gray-700 text-sm whitespace-pre-line">{comm.content}</p>
