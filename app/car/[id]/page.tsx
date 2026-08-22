@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
 export default function CarDetails() {
   const params = useParams();
+  const router = useRouter();
   const id = params?.id;
   const [car, setCar] = useState<any>(null);
   const [sellerName, setSellerName] = useState<string>('');
@@ -18,11 +19,20 @@ export default function CarDetails() {
   const [newComment, setNewComment] = useState('');
   const [user, setUser] = useState<any>(null);
 
+  // 🗑️ State خاصة بالتحقق مما إذا كان الإعلان يخص الضيف من هذا المتصفح
+  const [isMyGuestAd, setIsMyGuestAd] = useState(false);
+
   useEffect(() => {
     if (id) {
       fetchCarDetails();
       fetchComments();
       checkUser();
+
+      // التحقق مما إذا كان هذا الإعلان مخزناً في متصفح الضيف كإعلان خاص به
+      const guestCars = JSON.parse(localStorage.getItem('my_guest_cars') || '[]');
+      if (guestCars.includes(id)) {
+        setIsMyGuestAd(true);
+      }
     }
   }, [id]);
 
@@ -74,6 +84,23 @@ export default function CarDetails() {
     } else {
       setNewComment('');
       fetchComments();
+    }
+  }
+
+  // 🗑️ دالة حذف الإعلان للضيف من المتصفح
+  async function handleDeleteGuestAd() {
+    if (confirm('Are you sure you want to delete your ad?')) {
+      const { error } = await supabase.from('cars').delete().eq('id', id);
+      if (!error) {
+        const guestCars = JSON.parse(localStorage.getItem('my_guest_cars') || '[]');
+        const updatedCars = guestCars.filter((carId: string) => carId !== id);
+        localStorage.setItem('my_guest_cars', JSON.stringify(updatedCars));
+        
+        alert('Ad deleted successfully.');
+        router.push('/');
+      } else {
+        alert('Error deleting ad: ' + error.message);
+      }
     }
   }
 
@@ -157,6 +184,22 @@ export default function CarDetails() {
           </span>
         </div>
 
+        {/* زر حذف الإعلان يظهر فقط للضيف صاحب الإعلان من نفس المتصفح */}
+        {isMyGuestAd && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-2xl mb-6 flex items-center justify-between">
+            <div>
+              <h4 className="font-bold text-red-900">Manage Your Ad</h4>
+              <p className="text-sm text-red-600">You posted this ad from this browser. You can delete it anytime.</p>
+            </div>
+            <button 
+              onClick={handleDeleteGuestAd}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition shadow-sm cursor-pointer text-sm"
+            >
+              🗑️ Delete Ad
+            </button>
+          </div>
+        )}
+
         {/* معرض الصور */}
         <div className="mb-8">
           <div className="w-full h-[400px] md:h-[450px] rounded-2xl overflow-hidden shadow-md bg-gray-100 mb-4">
@@ -178,7 +221,7 @@ export default function CarDetails() {
           )}
         </div>
 
-        {/* تفاصيل السيارة والسعر (تمت إضافة شارة حالة السعر هنا) */}
+        {/* تفاصيل السيارة والسعر (مع حالة السعر) */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-gray-100 pb-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">{car.title}</h1>
@@ -190,7 +233,6 @@ export default function CarDetails() {
             <div className="text-3xl md:text-4xl font-black text-blue-600">
               {car.price ? `${car.price} DZD` : 'N/A'}
             </div>
-            {/* عرض حالة السعر (Prix fixe / Sur offre / Négociable) */}
             {car.price_type && (
               <span className="inline-block mt-1 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-200">
                 🏷️ {car.price_type}
@@ -199,7 +241,7 @@ export default function CarDetails() {
           </div>
         </div>
 
-        {/* قسم تواصل البائع ومعلومات الحساب وزر الواتساب */}
+        {/* قسم تواصل البائع وزر الواتساب */}
         <div className="bg-blue-50 border border-blue-100 p-6 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">Seller Information</h3>

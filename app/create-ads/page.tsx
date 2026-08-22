@@ -87,7 +87,8 @@ export default function CreateAd() {
     setErrorMessage('');
     
     try {
-      const { error: insertError } = await supabase.from('cars').insert([{ 
+      // إدراج الإعلان وجلب الـ ID المُتولّد تلقائياً
+      const { data: insertedData, error: insertError } = await supabase.from('cars').insert([{ 
         title, 
         price: Number(price), 
         price_type: priceType, // 🏷️ حفظ حالة السعر في القاعدة
@@ -101,9 +102,16 @@ export default function CreateAd() {
         images, 
         description, 
         user_id: userId 
-      }]);
+      }]).select().single();
       
       if (insertError) throw insertError;
+
+      // إذا نشر كضيف، نقوم بحفظ الـ ID في ذاكرة المتصفح (localStorage)
+      if (!userId && insertedData?.id) {
+        const existingGuestCars = JSON.parse(localStorage.getItem('my_guest_cars') || '[]');
+        localStorage.setItem('my_guest_cars', JSON.stringify([...existingGuestCars, insertedData.id]));
+      }
+
       setSuccess('🚀 Vehicle listed successfully!');
       setTimeout(() => router.push('/'), 2000);
     } catch (err: any) { 
