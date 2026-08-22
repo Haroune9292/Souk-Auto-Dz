@@ -87,7 +87,7 @@ export default function CarDetails() {
     }
   }
 
-  // 🗑️ دالة حذف الإعلان للضيف من المتصفح
+  // 🗑️ دالة حذف الإعلان للضيف من المتصفح مع تحديث الصفحة الرئيسية فوراً
   async function handleDeleteGuestAd() {
     if (confirm('Are you sure you want to delete your ad?')) {
       const { error } = await supabase.from('cars').delete().eq('id', id);
@@ -97,6 +97,7 @@ export default function CarDetails() {
         localStorage.setItem('my_guest_cars', JSON.stringify(updatedCars));
         
         alert('Ad deleted successfully.');
+        router.refresh(); // تحديث بيانات الصفحة الرئيسية لتختفي السيارة فوراً
         router.push('/');
       } else {
         alert('Error deleting ad: ' + error.message);
