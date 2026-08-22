@@ -13,7 +13,7 @@ export default function CarDetails() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState('');
 
-  // 💬 States الجديدة الخاصة بالتعليقات
+  // 💬 States الخاصة بالتعليقات
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [user, setUser] = useState<any>(null);
@@ -45,7 +45,6 @@ export default function CarDetails() {
     e.preventDefault();
     if (!newComment.trim() || !user) return;
 
-    // جلب اسم المستخدم (Username) من جدول profiles أو استخدام اسم افتراضي بدلاً من الإيميل
     let displayName = 'Member';
     const { data: profile } = await supabase
       .from('profiles')
@@ -65,7 +64,7 @@ export default function CarDetails() {
       {
         car_id: id,
         user_id: user.id,
-        username: displayName, // تخزين اسم المستخدم بدلاً من البريد الإلكتروني
+        username: displayName,
         content: newComment.trim()
       }
     ]);
@@ -179,7 +178,7 @@ export default function CarDetails() {
           )}
         </div>
 
-        {/* تفاصيل السيارة والسعر */}
+        {/* تفاصيل السيارة والسعر (تمت إضافة شارة حالة السعر هنا) */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-gray-100 pb-6">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">{car.title}</h1>
@@ -187,12 +186,20 @@ export default function CarDetails() {
               {car.wilaya || 'N/A'} {car.commune ? `- ${car.commune}` : ''} • {car.year || 'N/A'} • {car.transmission || 'N/A'}
             </p>
           </div>
-          <div className="text-3xl md:text-4xl font-black text-blue-600">
-            {car.price ? `${car.price} DZD` : 'N/A'}
+          <div className="text-right">
+            <div className="text-3xl md:text-4xl font-black text-blue-600">
+              {car.price ? `${car.price} DZD` : 'N/A'}
+            </div>
+            {/* عرض حالة السعر (Prix fixe / Sur offre / Négociable) */}
+            {car.price_type && (
+              <span className="inline-block mt-1 text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-200">
+                🏷️ {car.price_type}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* قسم تواصل البائع ومعلومات الحساب (مسجل أو ضيف) وزر الواتساب */}
+        {/* قسم تواصل البائع ومعلومات الحساب وزر الواتساب */}
         <div className="bg-blue-50 border border-blue-100 p-6 rounded-2xl mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="text-lg font-bold text-gray-900 mb-1">Seller Information</h3>
@@ -247,7 +254,7 @@ export default function CarDetails() {
           </p>
         </div>
 
-        {/* 💬 قسم التعليقات المضاف حديثاً (باستخدام username لحماية الخصوصية) */}
+        {/* 💬 قسم التعليقات */}
         <div className="bg-gray-50 p-6 md:p-8 rounded-2xl border border-gray-100">
           <h3 className="text-2xl font-black mb-6 text-gray-900 flex items-center gap-2">
             💬 Comments ({comments.length})
