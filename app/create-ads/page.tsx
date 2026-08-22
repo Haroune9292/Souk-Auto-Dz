@@ -28,6 +28,7 @@ export default function CreateAd() {
   // Form States
   const [title, setTitle] = useState('');
   const [price, setPrice] = useState('');
+  const [priceType, setPriceType] = useState('Négociable'); // 🏷️ الحالة الجديدة للسعر
   const [wilaya, setWilaya] = useState(wilayas[0]);
   const [commune, setCommune] = useState('');
   const [year, setYear] = useState('');
@@ -89,6 +90,7 @@ export default function CreateAd() {
       const { error: insertError } = await supabase.from('cars').insert([{ 
         title, 
         price: Number(price), 
+        price_type: priceType, // 🏷️ حفظ حالة السعر في القاعدة
         wilaya, 
         commune: commune || 'N/A', 
         year: Number(year), 
@@ -137,7 +139,7 @@ export default function CreateAd() {
           {/* Section 1: General Info */}
           <div className="mb-8">
             <h3 className="text-xs font-black uppercase text-amber-400 mb-4 tracking-widest">{t('generalInfo')}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('carModel')}</label>
                 <input required value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('carModelPlaceholder')} />
@@ -145,6 +147,18 @@ export default function CreateAd() {
               <div>
                 <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('priceLabel')}</label>
                 <input type="number" required value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition" placeholder={t('pricePlaceholder')} />
+              </div>
+              <div>
+                <label className="text-xs font-black uppercase text-slate-400 mb-2 block">{t('priceCondition') || "Price Condition"}</label>
+                <select 
+                  value={priceType} 
+                  onChange={(e) => setPriceType(e.target.value)} 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3 px-4 text-white focus:ring-2 focus:ring-amber-400 focus:border-amber-400 outline-none transition"
+                >
+                  <option value="Prix fixe" className="bg-slate-900 text-white">{t('fixedPrice') || "Prix fixe"}</option>
+                  <option value="Sur offre" className="bg-slate-900 text-white">{t('onOffer') || "Sur offre"}</option>
+                  <option value="Négociable" className="bg-slate-900 text-white">{t('negotiable') || "Négociable"}</option>
+                </select>
               </div>
             </div>
           </div>

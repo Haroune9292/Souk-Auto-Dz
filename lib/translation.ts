@@ -54,6 +54,11 @@ export const translations: Record<string, Record<string, string>> = {
     pasteImageUrls: "Paste image URLs here",
     publishButton: "🔑 Publish to Marketplace",
     processing: "Processing...",
+    // مفاتيح حالة السعر المضافة حديثاً
+    priceCondition: "Price Condition",
+    fixedPrice: "Fixed Price",
+    onOffer: "On Offer",
+    negotiable: "Negotiable",
   },
   fr: {
     home: "Accueil",
@@ -109,6 +114,11 @@ export const translations: Record<string, Record<string, string>> = {
     pasteImageUrls: "Coller les liens des images ici",
     publishButton: "🔑 Publier sur le marché",
     processing: "Traitement en cours...",
+    // مفاتيح حالة السعر المضافة حديثاً
+    priceCondition: "Type de prix",
+    fixedPrice: "Prix fixe",
+    onOffer: "Sur offre",
+    negotiable: "Négociable",
   },
   ar: {
     home: "الرئيسية",
@@ -164,5 +174,10 @@ export const translations: Record<string, Record<string, string>> = {
     pasteImageUrls: "الصق روابط الصور هنا",
     publishButton: "🔑 نشر في السوق",
     processing: "جاري المعالجة...",
+    // مفاتيح حالة السعر المضافة حديثاً
+    priceCondition: "حالة السعر",
+    fixedPrice: "سعر ثابت",
+    onOffer: "حسب العرض",
+    negotiable: "قابل للتفاوض",
   }
 };
