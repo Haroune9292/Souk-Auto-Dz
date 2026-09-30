@@ -5,25 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/context/LanguageContext';
 
-const wilayas = [
-  "01 - Adrar", "02 - Chlef", "03 - Laghouat", "04 - Oum El Bouaghi", "05 - Batna", "06 - Béjaïa", "07 - Biskra", "08 - Béchar", "09 - Blida", "10 - Bouira",
-  "11 - Tamanrasset", "12 - Tébessa", "13 - Tlemcen", "14 - Tiaret", "15 - Tizi Ouzou", "16 - Alger", "17 - Djelfa", "18 - Jijel", "19 - Sétif", "20 - Saïda",
-  "21 - Skikda", "22 - Sidi Bel Abbès", "23 - Annaba", "24 - Guelma", "25لإصلاح حقل "Image URL" الذي يظهر في الصورة `image_0b782f.png` واستبداله بنظام رفع صور حقيقي (Upload)، وتضمين قائمة الولايات الـ 58 الرسمية في الجزائر، بالإضافة إلى دعم اللغات الثلاث (الإنجليزية، الفرنسية، والعربية)، قمت بتحديث صفحة إضافة قطع الغيار بالكامل.
-
-إليك الكود المحدث لملف `app/add-part/page.tsx`.
-
-### 1. الكود المحدث (`app/add-part/page.tsx`)
-قم بنسخ هذا الكود واستبدال محتوى الملف الحالي:
-
-```tsx
-"use client";
-
-import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
-import { useLanguage } from '@/lib/context/LanguageContext';
-
-// قائمة الولايات الـ 58
+// Liste des 58 Wilayas
 const WILAYAS = [
   "01 - Adrar", "02 - Chlef", "03 - Laghouat", "04 - Oum El Bouaghi", "05 - Batna", "06 - Béjaïa", "07 - Biskra", "08 - Béchar", "09 - Blida", "10 - Bouira",
   "11 - Tamanrasset", "12 - Tébessa", "13 - Tlemcen", "14 - Tiaret", "15 - Tizi Ouzou", "16 - Alger", "17 - Djelfa", "18 - Jijel", "19 - Sétif", "20 - Saïda",
@@ -33,7 +15,7 @@ const WILAYAS = [
   "51 - Ouled Djellal", "52 - Béni Abbès", "53 - In Salah", "54 - In Guezzam", "55 - Touggourt", "56 - Djanet", "57 - El M'Ghair", "58 - El Meniaa"
 ];
 
-// قاموس الترجمة
+// Dictionnaire de traductions
 const TRANSLATIONS = {
   en: {
     title: "List a Spare Part",
@@ -53,7 +35,6 @@ const TRANSLATIONS = {
     wilaya: "Select Wilaya",
     phone: "Phone Number",
     uploadImage: "Upload Image",
-    uploading: "Uploading...",
     description: "Description (Details, exact condition, etc.)",
     publish: "Publish Spare Part",
     publishing: "Publishing...",
@@ -78,7 +59,6 @@ const TRANSLATIONS = {
     wilaya: "Sélectionner la Wilaya",
     phone: "Numéro de téléphone",
     uploadImage: "Importer une Image",
-    uploading: "Téléchargement...",
     description: "Description (Détails, état exact, etc.)",
     publish: "Publier la Pièce",
     publishing: "Publication en cours...",
@@ -103,7 +83,6 @@ const TRANSLATIONS = {
     wilaya: "اختر الولاية",
     phone: "رقم الهاتف",
     uploadImage: "رفع صورة",
-    uploading: "جاري الرفع...",
     description: "الوصف (التفاصيل، الحالة الدقيقة، إلخ)",
     publish: "نشر القطعة",
     publishing: "جاري النشر...",
@@ -118,7 +97,7 @@ export default function AddPart() {
   const t = TRANSLATIONS[lang as keyof typeof TRANSLATIONS] || TRANSLATIONS.en;
 
   const [loading, setLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File null |>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   
   const [formData, setFormData] = useState({
@@ -126,7 +105,6 @@ export default function AddPart() {
     compatible_brand: '', compatible_model: '', wilaya: '', phone: '', description: ''
   });
 
-  // معاينة الصورة قبل الرفع
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -141,15 +119,13 @@ export default function AddPart() {
 
     let imageUrl = '';
 
-    // 1. رفع الصورة إلى Supabase Storage أولاً
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `parts/${fileName}`;
 
-      // تأكد من تغيير 'images' إلى اسم الـ Bucket الخاص بك في Supabase
       const { error: uploadError } = await supabase.storage
-        .from('images') 
+        .from('images')
         .upload(filePath, imageFile);
 
       if (uploadError) {
@@ -166,7 +142,6 @@ export default function AddPart() {
       return;
     }
 
-    // 2. إرسال البيانات إلى قاعدة البيانات
     const { data: { session } } = await supabase.auth.getSession();
     
     const { data, error } = await supabase.from('spare_parts').insert([
@@ -198,15 +173,15 @@ export default function AddPart() {
         <form onSubmit={handleSubmit} className="space-y-4">
           
           <input type="text" placeholder={t.partName} required
-            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 text-slate-900"
             onChange={e => setFormData({...formData, title: e.target.value})} />
             
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input type="number" placeholder={t.price}
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 text-slate-900"
               onChange={e => setFormData({...formData, price: e.target.value})} />
               
-            <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+            <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer text-slate-900"
               onChange={e => setFormData({...formData, condition: e.target.value})}>
               <option value="New">{t.new}</option>
               <option value="Used">{t.used}</option>
@@ -215,15 +190,15 @@ export default function AddPart() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input type="text" placeholder={t.brand} required
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 text-slate-900"
               onChange={e => setFormData({...formData, compatible_brand: e.target.value})} />
             <input type="text" placeholder={t.model} required
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 text-slate-900"
               onChange={e => setFormData({...formData, compatible_model: e.target.value})} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+            <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer text-slate-900"
               onChange={e => setFormData({...formData, category: e.target.value})}>
               <option value="Engine">{t.engine}</option>
               <option value="Body">{t.body}</option>
@@ -232,7 +207,7 @@ export default function AddPart() {
               <option value="Accessories">{t.accessories}</option>
             </select>
             
-            <select required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+            <select required className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer text-slate-900"
               onChange={e => setFormData({...formData, wilaya: e.target.value})}>
               <option value="">{t.wilaya}</option>
               {WILAYAS.map(w => (
@@ -242,10 +217,9 @@ export default function AddPart() {
           </div>
 
           <input type="text" placeholder={t.phone} required
-            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-amber-500 text-slate-900"
             onChange={e => setFormData({...formData, phone: e.target.value})} />
             
-          {/* قسم رفع الصورة بدلاً من الرابط النصي */}
           <div className="w-full p-4 bg-slate-50 border border-slate-200 border-dashed rounded-xl outline-none text-center relative overflow-hidden">
             <input 
               type="file" 
@@ -257,7 +231,7 @@ export default function AddPart() {
             {imagePreview ? (
               <div className="flex flex-col items-center">
                 <img src={imagePreview} alt="Preview" className="h-32 object-contain rounded-lg mb-2" />
-                <span className="text-sm text-slate-500 font-bold">{t.uploadImage} (Click to change)</span>
+                <span className="text-sm text-slate-500 font-bold">{t.uploadImage}</span>
               </div>
             ) : (
               <div className="py-6 flex flex-col items-center justify-center gap-2">
@@ -268,7 +242,7 @@ export default function AddPart() {
           </div>
 
           <textarea placeholder={t.description} rows={4}
-            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none resize-none focus:ring-2 focus:ring-amber-500"
+            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none resize-none focus:ring-2 focus:ring-amber-500 text-slate-900"
             onChange={e => setFormData({...formData, description: e.target.value})} />
 
           <button type="submit" disabled={loading}
