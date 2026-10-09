@@ -63,7 +63,9 @@ const TRANSLATIONS = {
 export default function PartDetails() {
   const params = useParams();
   const router = useRouter();
-  const rawId = params?.id;
+  
+  // CORRECTION CRITIQUE : Récupération de l'ID avec la bonne casse (majuscule)
+  const rawId = params?.ID || params?.id;
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
   
   const { lang } = useLanguage();
@@ -79,6 +81,9 @@ export default function PartDetails() {
       fetchPartDetails();
       const guestParts = JSON.parse(localStorage.getItem('my_guest_parts') || '[]');
       if (guestParts.includes(id)) setIsMyGuestPart(true);
+    } else {
+      // Sécurité si l'ID n'est vraiment pas trouvé dans l'URL
+      console.warn("Aucun ID trouvé dans l'URL.");
     }
   }, [id]);
 
@@ -149,7 +154,6 @@ export default function PartDetails() {
         )}
 
         <div className="flex flex-col md:flex-row gap-8 mb-8">
-          {/* Image miniature avec effet au survol et clic pour agrandir */}
           <div 
             onClick={() => setIsImageModalOpen(true)}
             className="w-full md:w-1/2 h-[300px] sm:h-[400px] bg-slate-100 rounded-2xl overflow-hidden relative shadow-inner cursor-pointer group"
@@ -191,7 +195,6 @@ export default function PartDetails() {
 
       </div>
 
-      {/* Fenêtre modale (Lightbox) pour afficher l'image en grand */}
       {isImageModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setIsImageModalOpen(false)}>
           <div className="relative max-w-4xl max-h-[90vh] w-full flex flex-col items-center" onClick={e => e.stopPropagation()}>
