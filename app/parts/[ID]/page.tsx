@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState, use } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/context/LanguageContext';
@@ -17,7 +17,7 @@ const TRANSLATIONS = {
     whatsapp: "Message on WhatsApp",
     description: "Part Description",
     noDesc: "No additional details provided.",
-    loading: "Loading...",
+    loading: "Loading details...",
     notFound: "Part not found.",
     condition: "Condition",
     new: "New",
@@ -33,7 +33,7 @@ const TRANSLATIONS = {
     whatsapp: "Contacter sur WhatsApp",
     description: "Description de la Pièce",
     noDesc: "Aucun détail supplémentaire fourni.",
-    loading: "Chargement...",
+    loading: "Chargement des détails...",
     notFound: "Pièce introuvable.",
     condition: "État",
     new: "Neuf",
@@ -49,7 +49,7 @@ const TRANSLATIONS = {
     whatsapp: "مراسلة عبر واتساب",
     description: "وصف القطعة",
     noDesc: "لا توجد تفاصيل إضافية مدمجة.",
-    loading: "جاري التحميل...",
+    loading: "جاري تحميل التفاصيل...",
     notFound: "القطعة غير موجودة.",
     condition: "الحالة",
     new: "جديد",
@@ -57,10 +57,10 @@ const TRANSLATIONS = {
   }
 };
 
-export default function PartDetails() {
-  const params = useParams();
+export default function PartDetails({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const id = resolvedParams?.id;
   const router = useRouter();
-  const id = params?.id;
   const { lang } = useLanguage();
   const t = TRANSLATIONS[lang as keyof typeof TRANSLATIONS] || TRANSLATIONS.en;
 
@@ -77,9 +77,24 @@ export default function PartDetails() {
   }, [id]);
 
   async function fetchPartDetails() {
-    const { data, error } = await supabase.from('spare_parts').select('*').eq('id', id).single();
-    if (!error) setPart(data);
-    setLoading(false);
+    try {
+      console.log("Fetching part with ID:", id);
+      const { data, error } = await supabase
+        .from('spare_parts')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching part details:", error.message);
+      } else if (data) {
+        setPart(data);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleDelete() {
@@ -91,8 +106,25 @@ export default function PartDetails() {
     }
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-bold text-slate-700">{t.loading}</div>;
-  if (!part) return <div className="min-h-screen flex items-center justify-center font-bold text-slate-700">{t.notFound}</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center font-bold text-slate-700 bg-slate-50" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-amber-500 border-t-transparent mb-2"></div>
+          <p>{t.loading}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!part) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center font-bold text-slate-700 bg-slate-50 gap-4" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <p>{t.notFound}</p>
+        <Link href="/parts" className="bg-amber-500 text-slate-950 px-4 py-2 rounded-xl">{t.back}</Link>
+      </div>
+    );
+  }
 
   const cleanPhone = part.phone ? part.phone.replace(/[^0-9+]/g, '') : '';
   const whatsappUrl = cleanPhone 
@@ -115,9 +147,11 @@ export default function PartDetails() {
         <div className="flex flex-col md:flex-row gap-8 mb-8">
           <div className="w-full md:w-1/2 h-[300px] sm:h-[400px] bg-slate-100 rounded-2xl overflow-hidden relative shadow-inner">
              <img src={part.image || '/placeholder.jpg'} alt={part.title} className="w-full h-full object-cover" />
-             <span className={`absolute top-4 ${lang === 'ar' ? 'right-4' : 'left-4'} text-sm font-bold uppercase px-4 py-1.5 rounded-full text-white shadow-md ${part.condition === 'New' ? 'bg-green-500' : 'bg-orange-500'}`}>
-                {part.condition === 'New' ? t.new : t.used}
-             </span>
+             {part.condition && (
+               <span className={`absolute top-4 ${lang === 'ar' ? 'right-4' : 'left-4'} text-sm font-bold uppercase px-4 py-1.5 rounded-full text-white shadow-md ${part.condition === 'New' ? 'bg-green-500' : 'bg-orange-500'}`}>
+                  {part.condition === 'New' ? t.new : t.used}
+               </span>
+             )}
           </div>
 
           <div className="w-full md:w-1/2 flex flex-col justify-center">
