@@ -21,7 +21,8 @@ const TRANSLATIONS = {
     notFound: "Part not found.",
     condition: "Condition",
     new: "New",
-    used: "Used"
+    used: "Used",
+    close: "Close"
   },
   fr: {
     back: "← Retour aux Pièces de Rechange",
@@ -37,7 +38,8 @@ const TRANSLATIONS = {
     notFound: "Pièce introuvable.",
     condition: "État",
     new: "Neuf",
-    used: "Occasion"
+    used: "Occasion",
+    close: "Fermer"
   },
   ar: {
     back: "← العودة إلى قطع الغيار",
@@ -53,7 +55,8 @@ const TRANSLATIONS = {
     notFound: "القطعة غير موجودة.",
     condition: "الحالة",
     new: "جديد",
-    used: "مستعمل"
+    used: "مستعمل",
+    close: "إغلاق"
   }
 };
 
@@ -69,6 +72,7 @@ export default function PartDetails() {
   const [part, setPart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isMyGuestPart, setIsMyGuestPart] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -80,7 +84,6 @@ export default function PartDetails() {
 
   async function fetchPartDetails() {
     try {
-      // Récupération directe sans blocage avec .limit(1)
       const { data, error } = await supabase
         .from('spare_parts')
         .select('*')
@@ -146,8 +149,15 @@ export default function PartDetails() {
         )}
 
         <div className="flex flex-col md:flex-row gap-8 mb-8">
-          <div className="w-full md:w-1/2 h-[300px] sm:h-[400px] bg-slate-100 rounded-2xl overflow-hidden relative shadow-inner">
-             <img src={part.image || '/placeholder.jpg'} alt={part.title} className="w-full h-full object-cover" />
+          {/* Image miniature avec effet au survol et clic pour agrandir */}
+          <div 
+            onClick={() => setIsImageModalOpen(true)}
+            className="w-full md:w-1/2 h-[300px] sm:h-[400px] bg-slate-100 rounded-2xl overflow-hidden relative shadow-inner cursor-pointer group"
+          >
+             <img src={part.image || '/placeholder.jpg'} alt={part.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-bold text-sm">
+               🔍 Click to view full image
+             </div>
              {part.condition && (
                <span className={`absolute top-4 ${lang === 'ar' ? 'right-4' : 'left-4'} text-sm font-bold uppercase px-4 py-1.5 rounded-full text-white shadow-md ${part.condition === 'New' ? 'bg-green-500' : 'bg-orange-500'}`}>
                   {part.condition === 'New' ? t.new : t.used}
@@ -180,6 +190,25 @@ export default function PartDetails() {
         </div>
 
       </div>
+
+      {/* Fenêtre modale (Lightbox) pour afficher l'image en grand */}
+      {isImageModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setIsImageModalOpen(false)}>
+          <div className="relative max-w-4xl max-h-[90vh] w-full flex flex-col items-center" onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute -top-10 right-0 text-white font-bold bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg text-sm shadow-lg transition"
+            >
+              ✕ {t.close}
+            </button>
+            <img 
+              src={part.image || '/placeholder.jpg'} 
+              alt={part.title} 
+              className="max-h-[85vh] max-w-full object-contain rounded-xl shadow-2xl bg-black" 
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
