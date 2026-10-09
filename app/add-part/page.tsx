@@ -37,7 +37,6 @@ const TRANSLATIONS = {
     publish: "Publish Spare Part",
     publishing: "Publishing...",
     errorFile: "Please select an image.",
-    errorUpload: "Error uploading image: "
   },
   fr: {
     title: "Ajouter une Pièce",
@@ -61,7 +60,6 @@ const TRANSLATIONS = {
     publish: "Publier la Pièce",
     publishing: "Publication en cours...",
     errorFile: "Veuillez sélectionner une image.",
-    errorUpload: "Erreur lors du téléchargement: "
   },
   ar: {
     title: "إضافة قطعة غيار",
@@ -85,7 +83,6 @@ const TRANSLATIONS = {
     publish: "نشر القطعة",
     publishing: "جاري النشر...",
     errorFile: "الرجاء اختيار صورة.",
-    errorUpload: "خطأ في رفع الصورة: "
   }
 };
 
@@ -95,7 +92,7 @@ export default function AddPart() {
   const t = TRANSLATIONS[lang as keyof typeof TRANSLATIONS] || TRANSLATIONS.en;
 
   const [loading, setLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageBase64, setImageBase64] = useState<string>('');
   const [imagePreview, setImagePreview] = useState<string>('');
   
   const [formData, setFormData] = useState({
@@ -103,11 +100,17 @@ export default function AddPart() {
     compatible_brand: '', compatible_model: '', wilaya: '', phone: '', description: ''
   });
 
+  // تحويل الصورة محلياً إلى Base64 بدون أي طلب خارجي قد يفشل
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = reader.result as string;
+        setImageBase64(result);
+        setImagePreview(result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -115,29 +118,7 @@ export default function AddPart() {
     e.preventDefault();
     setLoading(true);
 
-    let imageUrl = '';
-
-    if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop();
-      // Nom de fichier simple sans sous-dossier pour éviter tout blocage
-      const fileName = `${Date.now()}.${fileExt}`;
-
-      console.log("Uploading to parts-images:", fileName);
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('parts-images')
-        .upload(fileName, imageFile);
-
-      if (uploadError) {
-        console.error("Supabase upload error:", uploadError);
-        alert(t.errorUpload + uploadError.message);
-        setLoading(false);
-        return;
-      }
-
-      const { data } = supabase.storage.from('parts-images').getPublicUrl(fileName);
-      imageUrl = data.publicUrl;
-    } else {
+    if (!imageBase64) {
       alert(t.errorFile);
       setLoading(false);
       return;
@@ -145,16 +126,16 @@ export default function AddPart() {
 
     const { data: { session } } = await supabase.auth.getSession();
     
+    // إرسال البيانات مباشرة مع صورة Base64 إلى جدول قاعدة البيانات
     const { data, error } = await supabase.from('spare_parts').insert([
       {
         ...formData,
-        image: imageUrl,
+        image: imageBase64,
         user_id: session?.user?.id || null, 
       }
     ]).select().single();
 
     if (error) {
-      console.error("Database insert error:", error);
       alert('Error: ' + error.message);
     } else {
       if (!session?.user) {
