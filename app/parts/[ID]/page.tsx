@@ -60,7 +60,9 @@ const TRANSLATIONS = {
 export default function PartDetails() {
   const params = useParams();
   const router = useRouter();
-  const id = params?.id as string;
+  const rawId = params?.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  
   const { lang } = useLanguage();
   const t = TRANSLATIONS[lang as keyof typeof TRANSLATIONS] || TRANSLATIONS.en;
 
@@ -78,19 +80,19 @@ export default function PartDetails() {
 
   async function fetchPartDetails() {
     try {
+      // Récupération directe sans blocage avec .limit(1)
       const { data, error } = await supabase
         .from('spare_parts')
         .select('*')
-        .eq('id', id)
-        .single();
+        .eq('id', id);
 
       if (error) {
-        console.error("Error:", error.message);
-      } else {
-        setPart(data);
+        console.error("Supabase error:", error.message);
+      } else if (data && data.length > 0) {
+        setPart(data[0]);
       }
     } catch (err) {
-      console.error("Error:", err);
+      console.error("Fetch error:", err);
     } finally {
       setLoading(false);
     }
