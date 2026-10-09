@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/context/LanguageContext';
@@ -57,10 +57,10 @@ const TRANSLATIONS = {
   }
 };
 
-export default function PartDetails({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const id = resolvedParams?.id;
+export default function PartDetails() {
+  const params = useParams();
   const router = useRouter();
+  const id = params?.id as string;
   const { lang } = useLanguage();
   const t = TRANSLATIONS[lang as keyof typeof TRANSLATIONS] || TRANSLATIONS.en;
 
@@ -78,20 +78,19 @@ export default function PartDetails({ params }: { params: Promise<{ id: string }
 
   async function fetchPartDetails() {
     try {
-      console.log("Fetching part with ID:", id);
       const { data, error } = await supabase
         .from('spare_parts')
         .select('*')
         .eq('id', id)
-        .maybeSingle();
+        .single();
 
       if (error) {
-        console.error("Error fetching part details:", error.message);
-      } else if (data) {
+        console.error("Error:", error.message);
+      } else {
         setPart(data);
       }
     } catch (err) {
-      console.error("Unexpected error:", err);
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
