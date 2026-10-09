@@ -11,6 +11,7 @@ const TRANSLATIONS = {
     back: "← Back to Spare Parts",
     myListing: "You posted this item.",
     delete: "🗑️ Delete",
+    edit: "✏️ Edit",
     confirmDelete: "Are you sure you want to delete this listing?",
     priceOnCall: "Price on Call",
     sellerDetails: "Seller Details",
@@ -28,6 +29,7 @@ const TRANSLATIONS = {
     back: "← Retour aux Pièces de Rechange",
     myListing: "Vous avez publié cet article.",
     delete: "🗑️ Supprimer",
+    edit: "✏️ Éditer",
     confirmDelete: "Êtes-vous sûr de vouloir supprimer cette annonce ?",
     priceOnCall: "Prix sur Appel",
     sellerDetails: "Détails du Vendeur",
@@ -45,6 +47,7 @@ const TRANSLATIONS = {
     back: "← العودة إلى قطع الغيار",
     myListing: "لقد قمت بنشر هذا العنصر.",
     delete: "🗑️ حذف",
+    edit: "✏️ تعديل",
     confirmDelete: "هل أنت متأكد أنك تريد حذف هذا الإعلان؟",
     priceOnCall: "السعر عند الاتصال",
     sellerDetails: "تفاصيل البائع",
@@ -73,14 +76,12 @@ export default function PartDetails() {
 
   const [part, setPart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isMyGuestPart, setIsMyGuestPart] = useState(false);
+  const [isOwner, setIsOwner] = useState(false); // Remplacé isMyGuestPart par isOwner pour gérer les deux cas
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchPartDetails();
-      const guestParts = JSON.parse(localStorage.getItem('my_guest_parts') || '[]');
-      if (guestParts.includes(id)) setIsMyGuestPart(true);
     } else {
       // Sécurité si l'ID n'est vraiment pas trouvé dans l'URL
       console.warn("Aucun ID trouvé dans l'URL.");
@@ -98,6 +99,14 @@ export default function PartDetails() {
         console.error("Supabase error:", error.message);
       } else if (data && data.length > 0) {
         setPart(data[0]);
+        
+        // VÉRIFICATION DU PROPRIÉTAIRE (Invité OU Connecté)
+        const guestParts = JSON.parse(localStorage.getItem('my_guest_parts') || '[]');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (guestParts.includes(id) || (session?.user?.id && session.user.id === data[0].user_id)) {
+          setIsOwner(true);
+        }
       }
     } catch (err) {
       console.error("Fetch error:", err);
@@ -146,10 +155,17 @@ export default function PartDetails() {
         
         <Link href="/parts" className="text-amber-600 font-bold mb-6 inline-block hover:underline">{t.back}</Link>
 
-        {isMyGuestPart && (
-          <div className="bg-red-50 p-4 rounded-xl mb-6 flex justify-between items-center border border-red-200">
-            <span className="text-red-800 font-bold text-sm">{t.myListing}</span>
-            <button onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition">{t.delete}</button>
+        {isOwner && (
+          <div className="bg-amber-50 p-4 rounded-xl mb-6 flex justify-between items-center border border-amber-200">
+            <span className="text-amber-900 font-bold text-sm sm:text-base">{t.myListing}</span>
+            <div className="flex gap-2">
+              <Link href={`/parts/edit-parts/${id}`} className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm">
+                {t.edit}
+              </Link>
+              <button onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm">
+                {t.delete}
+              </button>
+            </div>
           </div>
         )}
 
