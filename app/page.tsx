@@ -4,9 +4,16 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/context/LanguageContext';
+import { useRouter } from 'next/navigation';
+import { Device } from '@capacitor/device';
 
 export default function Home() {
   const { t } = useLanguage();
+  const router = useRouter();
+  
+  // حالة جديدة للتحقق من بيئة التطبيق قبل عرض أي شيء
+  const [isCheckingApp, setIsCheckingApp] = useState(true);
+
   const [cars, setCars] = useState<any[]>([]);
   const [filteredCars, setFilteredCars] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,9 +31,32 @@ export default function Home() {
   const [activeImages, setActiveImages] = useState<string[]>([]);
   const [activeImgIndex, setActiveImgIndex] = useState(0);
 
+  // التحقق من المنصة (اندرويد أو ويب) وجلب السيارات
   useEffect(() => {
-    fetchCars();
-  }, []);
+    const initApp = async () => {
+      try {
+        // 1. معرفة ما إذا كان التطبيق يعمل على الهاتف
+        const info = await Device.getInfo();
+        
+        // 2. إذا كان يعمل على أندرويد (أو iOS)، نتحقق من تسجيل الدخول
+        if (info.platform === 'android' || info.platform === 'ios') {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            router.replace('/login');
+            return; // توقيف التنفيذ هنا للانتقال لصفحة الدخول
+          }
+        }
+      } catch (error) {
+        console.error('Error checking platform:', error);
+      } finally {
+        // 3. السماح بعرض المحتوى وجلب البيانات إذا اجتاز الفحص (أو إذا كان على الويب)
+        setIsCheckingApp(false);
+        fetchCars();
+      }
+    };
+
+    initApp();
+  }, [router]);
 
   useEffect(() => {
     let result = [...cars];
@@ -100,6 +130,16 @@ export default function Home() {
     setActiveImgIndex(0);
     setShowModal(true);
   };
+
+  // شاشة تحميل تظهر فقط أثناء الفحص الأولي لتجنب وميض الصفحة
+  if (isCheckingApp) {
+    return (
+      <div className="min-h-screen bg-[#0B132B] flex flex-col items-center justify-center text-white">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-sm text-slate-300 font-medium">Chargement de Souk Auto Dz...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-600 selection:text-white">
@@ -222,13 +262,13 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCars.map((car) => {
               const carImages = car.images 
-  ? (Array.isArray(car.images) ? car.images : car.images.split(',').map((i: string) => i.trim()).filter(Boolean))
-  : [car.image || '/peugeot.jpg'];
+                ? (Array.isArray(car.images) ? car.images : car.images.split(',').map((i: string) => i.trim()).filter(Boolean))
+                : [car.image || '/peugeot.jpg'];
 
               return (
                 <div key={car.id} className="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col group">
                   
-                  {/* Clickable Image Thumbnail with Preview Action */}
+                  {/* Clickable Image Thumbnail */}
                   <div 
                     className="relative h-56 w-full cursor-pointer bg-slate-100 overflow-hidden"
                     onClick={(e) => openImageModal(car, e)}
@@ -260,7 +300,7 @@ export default function Home() {
                     
                     <div className="text-slate-500 text-sm mb-6 space-y-1.5 font-medium border-t border-slate-100 pt-4">
                       <p className="flex items-center gap-2">📍 {car.wilaya || 'N/A'} {car.commune ? `- ${car.commune}` : ''}</p>
-                      <p className="flex items-center gap-2">⚙️ {car.transmission || 'N/A'} • ⛽ {car.fuel || 'N/A'}</p>
+                      <p className="flex items-center gap-2">⚙️ {car.transmission || 'N/A'} ⛽ {car.fuel || 'N/A'}</p>
                       <p className="flex items-center gap-2">🛣️ {car.mileage ? `${car.mileage} Km` : 'N/A'}</p>
                     </div>
 

@@ -1,150 +1,139 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useLanguage } from '@/lib/context/LanguageContext';
 
-export default function Home() {
-  const [cars, setCars] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  
-  // حالة نافذة عرض الصور المنبثقة
-  const [showModal, setShowModal] = useState(false);
-  const [activeImages, setActiveImages] = useState<string[]>([]);
-  const [activeImgIndex, setActiveImgIndex] = useState(0);
+export default function SignUp() {
+  const { t, lang } = useLanguage();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); // حقل تأكيد كلمة المرور
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const router = useRouter();
 
-  useEffect(() => {
-    fetchCars();
-  }, []);
-
-  async function fetchCars() {
+  async function handleSignUp(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true);
-    const { data, error } = await supabase
-      .from('cars')
-      .select('*')
-      .order('created_at', { ascending: false });
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    // التحقق من تطابق كلمة المرور قبل الإرسال لقاعدة البيانات
+    if (password !== confirmPassword) {
+      setErrorMsg(t('passwordMismatch') || (lang === 'ar' ? 'كلمتا المرور غير متطابقتين' : 'Passwords do not match'));
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
     if (error) {
-      console.error('Error fetching cars:', error);
+      setErrorMsg(error.message);
+      setLoading(false);
     } else {
-      setCars(data || []);
+      // رسالة طلب تفعيل الإيميل وتفريغ الخانات
+      setSuccessMsg(t('checkEmailMsg') || (lang === 'ar' ? 'تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك.' : 'Account created successfully! Please check your email to verify your account.'));
+      setLoading(false);
+      setEmail('');
+      setPassword('');
+      setConfirmPassword('');
     }
-    setLoading(false);
   }
 
-  const openImageModal = (car: any, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    let imagesList: string[] = ['/peugeot.jpg'];
-    if (car?.images) {
-      if (Array.isArray(car.images)) {
-        imagesList = car.images;
-      } else if (typeof car.images === 'string') {
-        imagesList = car.images.split(',').map((img: string) => img.trim()).filter(Boolean);
-      }
-    } else if (car?.image) {
-      imagesList = [car.image];
-    }
-
-    setActiveImages(imagesList);
-    setActiveImgIndex(0);
-    setShowModal(true);
-  };
+  const isRtl = lang === 'ar';
 
   return (
-    <main className="min-h-screen bg-gray-100 py-10 px-4 text-black">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-black mb-8 text-gray-900">Available Car Listings</h1>
+    <div className={`min-h-screen bg-[#0B132B] flex items-center justify-center py-12 px-4 ${isRtl ? 'text-right' : 'text-left'}`} dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="max-w-md w-full bg-slate-900/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-800 p-8 sm:p-10">
+        
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 mx-auto bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-amber-500/20 border border-yellow-200/40">
+            <svg className="w-8 h-8 fill-current text-slate-950" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+          <h1 className="text-3xl font-black text-white mb-2 tracking-tight">
+            {t('createAccount') || (lang === 'ar' ? 'إنشاء حساب' : 'Create Account')}
+          </h1>
+          <p className="text-slate-400 text-sm">
+            {t('joinUs') || (lang === 'ar' ? 'انضم إلى سوق أوطو ديزاد اليوم' : 'Join Souk Auto Dz today')}
+          </p>
+        </div>
 
-        {loading ? (
-          <div className="text-center py-20 font-semibold text-gray-600">Loading cars...</div>
-        ) : cars.length === 0 ? (
-          <div className="text-center py-20 text-gray-500 font-medium">No cars found.</div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {cars.map((car) => {
-              const carImages = car.images 
-                ? (Array.isArray(car.images) ? car.images : car.images.split(',').map((i: string) => i.trim()).filter(Boolean))
-                : [car.image || '/peugeot.jpg'];
-
-              return (
-                <div key={car.id} className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition flex flex-col">
-                  
-                  {/* صورة السيارة القابلة للنقر لتفتح المعرض المنبثق */}
-                  <div 
-                    className="relative h-48 w-full cursor-pointer bg-gray-100 overflow-hidden group"
-                    onClick={(e) => openImageModal(car, e)}
-                  >
-                    <img 
-                      src={carImages[0]} 
-                      alt={car.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white font-bold text-sm">
-                      🔍 Click to view pictures
-                    </div>
-                  </div>
-
-                  {/* تفاصيل السيارة */}
-                  <div className="p-4 flex flex-col flex-grow">
-                    <h3 className="font-bold text-lg text-gray-900 mb-1 truncate">{car.title}</h3>
-                    <p className="text-blue-600 font-extrabold text-xl mb-3">{car.price ? `${car.price} DZD` : 'N/A'}</p>
-                    
-                    <div className="text-gray-500 text-sm mb-4 space-y-1">
-                      <p>📍 {car.wilaya || 'N/A'} {car.commune ? `- ${car.commune}` : ''}</p>
-                      <p>📅 Year: {car.year || 'N/A'} • ⚙️ {car.transmission || 'N/A'}</p>
-                    </div>
-
-                    <div className="mt-auto">
-                      <Link 
-                        href={`/car/${car.id}`}
-                        className="block w-full text-center bg-gray-900 hover:bg-blue-600 text-white py-2.5 rounded-xl font-semibold transition"
-                      >
-                        View Details
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+        {errorMsg && (
+          <div className="mb-6 bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl text-sm font-medium text-center">
+            {errorMsg}
           </div>
         )}
-      </div>
 
-      {/* نافذة عرض الصور المنبثقة (Lightbox Modal) */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex flex-col items-center justify-center p-4">
-          <button 
-            onClick={() => setShowModal(false)}
-            className="absolute top-6 right-6 text-white text-3xl font-bold bg-white/25 hover:bg-white/40 w-12 h-12 rounded-full flex items-center justify-center transition cursor-pointer"
-          >
-            ✕
-          </button>
+        {successMsg && (
+          <div className="mb-6 bg-green-500/10 border border-green-500/50 text-green-400 p-4 rounded-xl text-sm font-medium text-center">
+            {successMsg}
+          </div>
+        )}
 
-          <div className="max-w-4xl max-h-[75vh] w-full flex items-center justify-center mb-4">
-            <img 
-              src={activeImages[activeImgIndex] || activeImages[0]} 
-              alt="Car Preview" 
-              className="max-h-[75vh] max-w-full object-contain rounded-xl shadow-2xl"
+        <form onSubmit={handleSignUp} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">
+              {t('emailLabel') || (lang === 'ar' ? 'البريد الإلكتروني' : 'Email Address')}
+            </label>
+            <input 
+              type="email" 
+              required
+              placeholder="name@example.com" 
+              className={`w-full bg-slate-950 border border-slate-800 p-4 rounded-xl text-white placeholder-slate-600 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition ${isRtl ? 'text-right' : 'text-left'}`}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
-          {activeImages.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto max-w-full p-2">
-              {activeImages.map((img: string, idx: number) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveImgIndex(idx)}
-                  className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition cursor-pointer ${activeImgIndex === idx ? 'border-blue-500 scale-105' : 'border-transparent opacity-60 hover:opacity-100'}`}
-                >
-                  <img src={img} alt="Thumb" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </main>
-  );
-}
+          <div>
+            <label className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">
+              {t('passwordLabel') || (lang === 'ar' ? 'كلمة المرور' : 'Password')}
+            </label>
+            <input 
+              type="password" 
+              required
+              placeholder="••••••••" 
+              className={`w-full bg-slate-950 border border-slate-800 p-4 rounded-xl text-white placeholder-slate-600 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition ${isRtl ? 'text-right' : 'text-left'}`}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase text-slate-400 mb-2 tracking-wider">
+              {t('confirmPasswordLabel') || (lang === 'ar' ? 'تأكيد كلمة المرور' : 'Confirm Password')}
+            </label>
+            <input 
+              type="password" 
+              required
+              placeholder="••••••••" 
+              className={`w-full bg-slate-950 border border-slate-800 p-4 rounded-xl text-white placeholder-slate-600 outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition ${isRtl ? 'text-right' : 'text-left'}`}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-slate-950 text-center py-4 rounded-xl font-black text-lg transition shadow-lg shadow-amber-500/20 disabled:opacity-50 mt-4"
+          >
+            {loading 
+              ? (t('creating') || (lang === 'ar' ? 'جاري إنشاء الحساب...' : 'Creating account...')) 
+              : (t('signUpBtn') || (lang === 'ar' ? 'إنشاء حساب' : 'Sign Up'))}
+          </button>
+        </form>
+
+        <div className="mt-8 text-center">
+          <p className="text-sm text-slate-400">
+            {t('alreadyHaveAccount') || (lang === 'ar' ? 'لديك حساب بالفعل؟ ' : 'Already have an account? ')}
+            <Link href="/login" className="font-bold text-amber-400 hover:text-amber-3
